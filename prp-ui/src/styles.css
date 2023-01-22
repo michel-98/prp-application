@@ -1,0 +1,10 @@
+@import "~ng-pick-datetime/assets/style/picker.min.css";
+
+.clickable{
+  cursor: pointer;
+}
+
+.cdk-overlay-container {
+  position: fixed;
+  z-index: 10000!important;
+}

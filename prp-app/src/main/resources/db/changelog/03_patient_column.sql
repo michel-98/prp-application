@@ -1,0 +1,2 @@
+ALTER TABLE visit
+    ADD COLUMN patient_id INTEGER REFERENCES patient (id) ON DELETE CASCADE;

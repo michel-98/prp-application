@@ -1,0 +1,51 @@
+# Docker Compose file Reference (https://docs.docker.com/compose/compose-file/)
+version: '3'
+
+#Define services
+services:
+
+  #PostgreSQL Database for the application
+  prp-postgres:
+    image: "postgres:9.6-alpine"
+    container_name: prp-postgres
+    #Volume mounted for database for the storage
+    volumes:
+      - prp-data:/var/lib/postgresql/data
+    ports:
+      - 6544:5432 # Forward the exposed port 5433 on the container to port 5433 on the host machine
+
+    #Environment variable for DB name, user and password
+    environment:
+      - POSTGRES_DB=prp
+      - POSTGRES_USER=prp
+      - POSTGRES_PASSWORD=prp
+
+  #Back-end Spring Boot Application
+  prp-app:
+    #The docker file in prp-app build the jar and provides the docker image with the following name.
+    build: ./prp-app
+    container_name: prp-app
+
+    #Environment variables for Spring Boot Application.
+    environment:
+      - DB_SERVER=prp-postgres
+      - POSTGRES_DB=prp
+      - POSTGRES_USER=prp
+      - POSTGRES_PASSWORD=prp
+    ports:
+      - 8080:8080 # Forward the exposed port 8080 on the container to port 8080 on the host machine
+    links:
+      - prp-postgres
+
+  #Fron-end Angular Application
+  prp-ui:
+    build: ./prp-ui
+    container_name: prp-ui
+    ports:
+      - 4200:80
+    links:
+      - prp-app
+
+#Volumes for DB data
+volumes:
+  prp-data:

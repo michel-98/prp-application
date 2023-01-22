@@ -1,0 +1,204 @@
+<div *ngIf="patientView">
+  <form>
+    <div class="mb-3 row">
+      <label for="table-complete-search" class="col-xs-3 col-sm-auto col-form-label">Cerca paziente:</label>
+      <div class="col-xs-3 col-sm-auto">
+        <input
+          id="table-complete-search"
+          type="text"
+          class="form-control"
+          name="searchTerm"
+          [(ngModel)]="patientsService.searchTerm"
+        />
+      </div>
+    </div>
+
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col" class="clickable" sortable="name" (sort)="onPatientsSort($event)">Name</th>
+        <th scope="col" class="clickable" sortable="surname" (sort)="onPatientsSort($event)">Surname</th>
+        <th scope="col" class="clickable" sortable="ssn" (sort)="onPatientsSort($event)">SSN</th>
+        <th scope="col">Visits</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let patient of patients | async">
+        <th scope="row">{{ patient.id }}</th>
+        <td>
+          <ngb-highlight [result]="patient.name" [term]="patientsService.searchTerm"></ngb-highlight>
+        </td>
+        <td>
+          <ngb-highlight [result]="patient.surname" [term]="patientsService.searchTerm"></ngb-highlight>
+        </td>
+        <td>
+          <ngb-highlight [result]="patient.ssn | number" [term]="patientsService.searchTerm"></ngb-highlight>
+        </td>
+        <td>
+          <button type="button" class="btn btn-outline-secondary" [ngbTooltip]="'Look all visits'"
+                  (click)="renderVisitsPatient(patient.id)">
+            <i class="bi bi-eye"></i>
+            <span class="visually-hidden">Button</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary" [ngbTooltip]="'Add visit'"
+                  (click)="addVisit(patient,content)">
+            <i class="bi bi-plus-circle"></i>
+            <span class="visually-hidden">Button</span>
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between p-2">
+      <ngb-pagination [collectionSize]="(totalPatients | async)!" [(page)]="patientsService.page"
+                      [pageSize]="patientsService.pageSize">
+      </ngb-pagination>
+
+      <select class="form-select" style="width: auto" name="pageSize" [(ngModel)]="patientsService.pageSize">
+        <option [ngValue]="2">2 items per page</option>
+        <option [ngValue]="4">4 items per page</option>
+        <option [ngValue]="6">6 items per page</option>
+      </select>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="!patientView">
+  <div>
+    <button type="button" class="btn btn-outline-secondary" [ngbTooltip]="'Go back'" (click)="goBack()">
+      <i class="bi bi-arrow-return-left"></i>
+      <span class="visually-hidden">Button</span>
+    </button>
+  </div>
+  <form>
+    <div class="mb-3 row">
+      <label for="table-complete-search-2" class="col-xs-3 col-sm-auto col-form-label">Cerca visita:</label>
+      <div class="col-xs-3 col-sm-auto">
+        <input
+          id="table-complete-search-2"
+          type="text"
+          class="form-control"
+          name="searchTerm"
+          [(ngModel)]="visitsService.searchTerm"
+        />
+      </div>
+    </div>
+
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col" class="clickable" sortable="name" (sort)="onVisitsSort($event)">Name</th>
+        <th scope="col" class="clickable" sortable="surname" (sort)="onVisitsSort($event)">Surname</th>
+        <th scope="col" class="clickable" sortable="ssn" (sort)="onVisitsSort($event)">SSN</th>
+        <th scope="col" class="clickable" sortable="history" (sort)="onVisitsSort($event)">Family History</th>
+        <th scope="col">Azioni</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let visit of visits | async">
+        <th scope="row">{{ visit.id }}</th>
+        <td>
+          <ngb-highlight [result]="visit.type" [term]="visitsService.searchTerm"></ngb-highlight>
+        </td>
+        <td>
+          <ngb-highlight [result]="visit.reason" [term]="visitsService.searchTerm"></ngb-highlight>
+        </td>
+        <td>
+          <ngb-highlight [result]="visit.dateTime | date" [term]="visitsService.searchTerm"></ngb-highlight>
+        </td>
+        <td>
+          <ngb-highlight [result]="visit.history" [term]="visitsService.searchTerm"></ngb-highlight>
+        </td>
+        <td>
+          <button type="button" class="btn btn-outline-secondary" [ngbTooltip]="'Modify'"
+                  (click)="modify(visit, content)">
+            <i class="bi bi-pencil"></i>
+            <span class="visually-hidden">Button</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary" [ngbTooltip]="'Delete'" (click)="delete(visit)">
+            <i class="bi bi-trash"></i>
+            <span class="visually-hidden">Button</span>
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between p-2">
+      <ngb-pagination [collectionSize]="(totalVisits | async)!" [(page)]="visitsService.page"
+                      [pageSize]="visitsService.pageSize">
+      </ngb-pagination>
+
+      <select class="form-select" style="width: auto" name="pageSize" [(ngModel)]="visitsService.pageSize">
+        <option [ngValue]="2">2 items per page</option>
+        <option [ngValue]="4">4 items per page</option>
+        <option [ngValue]="6">6 items per page</option>
+      </select>
+    </div>
+  </form>
+</div>
+
+
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Add Visit</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form (ngSubmit)="modal.close('Save click');onSubmitVisit()" #heroForm="ngForm">
+      <div class="form-group">
+        <label for="history">Family History</label>
+        <textarea type="history" class="form-control" id="history"
+                  required
+                  [(ngModel)]="visitModel.history" name="history"
+                  #history="ngModel"></textarea>
+        <div [hidden]="history.valid || history.pristine"
+             class="alert alert-danger">
+          Family History is required
+        </div>
+      </div>
+      <div class="form-group col-sm-6">
+        <label for="dateTime">Date & Time of the visit</label>
+        <input [(ngModel)]="visitModel.dateTime" required #dateTime="ngModel" id="dateTime" name="dateTime"
+               [owlDateTimeTrigger]="dtPicker1" [owlDateTime]="dtPicker1">
+        <owl-date-time #dtPicker1></owl-date-time>
+        <div [hidden]="dateTime.valid || dateTime.pristine" class="alert alert-danger">
+          Date and Time are required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="type">Type</label>
+        <select class="form-control" id="type"
+                required
+                [(ngModel)]="visitModel.type" name="type"
+                #type="ngModel">
+          <option *ngFor="let type of visitTypes" [value]="type">{{type}}</option>
+        </select>
+        <div [hidden]="type.valid || type.pristine" class="alert alert-danger">
+          Type is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reason">Reason</label>
+        <select class="form-control" id="reason"
+                required
+                [(ngModel)]="visitModel.reason" name="reason"
+                #reason="ngModel">
+          <option *ngFor="let reason of visitReasons" [value]="reason">{{reason}}</option>
+        </select>
+        <div [hidden]="reason.valid || reason.pristine" class="alert alert-danger">
+          Reason is required
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-success" [disabled]="!heroForm.form.valid">Submit</button>
+    </form>
+
+
+  </div>
+</ng-template>
